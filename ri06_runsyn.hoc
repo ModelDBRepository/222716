@@ -1,0 +1,99 @@
+load_file("nrngui.hoc")			// neuron main menu
+xopen("ri06.nrn")			// geometry
+objref soma
+somaA soma = new SectionRef()  
+xopen("ri06_memb.hoc")			// membrane mechanisms
+
+// choose the types of conductances to include
+hblock = 0				// between 0 and 1, for fraction blocked. Use 0 or 1
+kablock = 0				// between 0 and 1 for fraction blocked. Use 0 or 1
+kdrblock = 0				// between 0 and 1 for fraction blocked. Use 0 or 1
+nablock = 0				// between 0 and 1 for fraction blocked. Use 0 or 1
+init_routine = 1			// 1 for using Carnevale's init routine
+usecvode = 1				// 1 for using cvode
+
+// these next few lines correct for the fact that the soma is elliptical rather than cylindrical
+// due to an idiosynchrosy of NEURON, you have to do the area call first
+
+access somaA
+area(0.5)
+correctsoma()
+
+init_params()
+insert_pass()
+insert_h()
+insert_kdr()
+insert_ka()
+insert_na()
+reinit_props()
+inittime=10000
+delay=1500
+stimdel=0.2
+syng=0.0027
+currinjon=0
+
+//Set up current clamp objects
+objectvar elecstim, elecstim2
+somaA elecstim=new IClamp(0.5)
+somaA elecstim2=new IClamp(0.5)
+proc clamp_cc() {
+	somaA {
+		elecstim.del = $1
+		elecstim.dur = $2
+		elecstim.amp = $3
+		elecstim2.del = $1
+		elecstim2.dur = $2
+		elecstim2.amp = 0
+	}
+}
+clamp_cc(inittime, 30, stimdel)
+
+
+//Set up synapse objects
+objref ampasyn, ampasyn2
+ampasyn = new synampa()
+ampasyn2 = new synampa()
+dendA5_011111010 {
+	ampasyn.loc(0.6)
+	ampasyn.gmax=syng
+	ampasyn.onset=inittime
+	ampasyn.tau0=0.2
+	ampasyn.tau1=2
+	ampasyn.e=0
+	ampasyn2.loc(0.6)
+	ampasyn2.gmax=syng
+	ampasyn2.onset=ampasyn.onset+delay
+	ampasyn2.tau0=0.2
+	ampasyn2.tau1=2
+}
+tstop=ampasyn2.onset+30
+
+xopen("ri06_graphsyn.hoc")
+
+proc init() {local dtsav
+	ampasyn2.onset=ampasyn.onset+delay
+	ampasyn2.gmax=syng
+	ampasyn.gmax=syng*(1-currinjon)
+	clamp_cc(ampasyn.onset,30,stimdel*currinjon)
+	tstop=ampasyn2.onset+30
+	elecstim.del=ampasyn.onset-5
+	elecstim2.del=ampasyn2.onset-5
+	cvode.active(0)
+	reinit_props()
+	
+	v_init = Vrest		// v_init is the value displayed in the run control panel
+	finitialize(v_init)
+	fcurrent()
+	
+	if (init_routine == 1) {
+		dtsav = dt
+		dt = 10
+		t = 1e6
+		for i = 0,40 {
+			fadvance()
+		}
+		dt = dtsav
+		finitialize()
+	}
+	cvode.active(1)
+}

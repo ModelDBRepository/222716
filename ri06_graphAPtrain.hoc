@@ -1,0 +1,85 @@
+// Sets up all the graphs for the train of bAPs
+
+//Panel with option to change percent of slow inactivating sodium conductance
+xpanel("Na channel parameters")
+xvalue("Fraction of distal slow Na","distslowfrac",1)
+xpanel(0,75)
+
+//Run control box
+objref contrl
+contrl = new VBox()
+contrl.intercept(1)
+nrncontrolmenu()
+contrl.intercept(0)
+contrl.map("Control",1,400,-1,-1)
+
+//Voltage shape plot
+objref shbox
+shbox = new VBox()
+shbox.intercept(1)
+access somaA
+objref sl 
+sl = new SectionList()
+sl.wholetree()
+objref s
+s = new PlotShape(sl)
+s.colormap(12,1)
+s.colormap(0,0,0,255)
+s.colormap(1,0,85,255)
+s.colormap(2,0,170,255)
+s.colormap(3,0,255,255)
+s.colormap(4,0,255,128)
+s.colormap(5,0,255,0)
+s.colormap(6,110,255,0) 
+s.colormap(7,180,255,0)
+s.colormap(8,255,255,0) 
+s.colormap(9,255,170,0)
+s.colormap(10,255,100,0)
+s.colormap(11,255,0,0)
+s.variable("v")
+s.show(0)
+s.exec_menu("Shape Plot")
+s.scale(-70,40)
+fast_flush_list.append(s)
+shbox.intercept(0)
+shbox.map("Shape",700,10,400,400)
+
+//Voltage plot at soma
+objref volts
+volts = new VBox()
+volts.intercept(1)
+objref g
+g = new Graph()
+g.addvar("somaA.v(0.5)",1,0)
+g.size(inittime,tstop,-70,20)
+graphList[0].append(g)
+g.save_name("graphList[0].")
+volts.intercept(0)
+volts.map("voltages",200,0,350,400)
+
+//Voltage plot at intermediate dendrite
+objref volts2
+volts2 = new VBox()
+volts2.intercept(1)
+objref g2
+g2 = new Graph()
+g2.addvar("dendA5_011111111111.v(0.5)",2,0)
+g2.size(inittime,tstop,-70,20)
+graphList[0].append(g2)
+g2.save_name("graphList[0].")
+volts2.intercept(0)
+volts2.map("voltages",300,0,350,400)
+
+//Voltage plot at distal dendrite
+objref volts3
+volts3 = new VBox()
+volts3.intercept(1)
+objref g3
+g3 = new Graph()
+g3.addvar("dendA5_011111111111111.v(0.5)",2,0)
+g3.size(inittime,tstop,-70,20)
+graphList[0].append(g3)
+g3.save_name("graphList[0].")
+volts3.intercept(0)
+volts3.map("voltages",500,0,350,400)
+

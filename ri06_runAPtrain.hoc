@@ -1,0 +1,61 @@
+load_file("nrngui.hoc")			// neuron main menu
+xopen("ri06.nrn")			// geometry
+objref soma
+somaA soma = new SectionRef()  
+xopen("ri06_memb.hoc")			// membrane mechanisms
+
+// choose the types of conductances to include
+hblock = 0				// between 0 and 1, for fraction blocked. Use 0 or 1
+kablock = 0				// between 0 and 1 for fraction blocked. Use 0 or 1
+kdrblock = 0				// between 0 and 1 for fraction blocked. Use 0 or 1
+nablock = 0				// between 0 and 1 for fraction blocked. Use 0 or 1
+init_routine = 1			// 1 for using Carnevale's init routine
+usecvode = 1				// 1 for using cvode
+
+// these next few lines correct for the fact that the soma is elliptical rather than cylindrical
+// due to an idiosynchrosy of NEURON, you have to do the area call first
+
+access somaA
+area(0.5)
+correctsoma()
+
+init_params()
+insert_pass()
+insert_h()
+insert_kdr()
+insert_ka()
+insert_na()
+reinit_props()
+inittime=10000
+
+//Set up current clamp objects
+objectvar elecstim
+somaA elecstim=new IClamp(0.5)
+elecstim.del = inittime
+elecstim.dur = 800
+elecstim.amp = 0.13
+
+tstop=inittime+elecstim.dur+100
+
+xopen("ri06_graphAPtrain.hoc")
+
+proc init() {local dtsav
+	cvode.active(0)
+	reinit_props()
+	
+	v_init = Vrest		// v_init is the value displayed in the run control panel
+	finitialize(v_init)
+	fcurrent()
+	
+	if (init_routine == 1) {
+		dtsav = dt
+		dt = 10
+		t = 1e6
+		for i = 0,40 {
+			fadvance()
+		}
+		dt = dtsav
+		finitialize()
+	}
+	cvode.active(1)
+}

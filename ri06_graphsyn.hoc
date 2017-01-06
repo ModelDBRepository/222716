@@ -1,0 +1,104 @@
+// Sets up all the graphs for the train of bAPs
+
+//Panel with option to change type of simulation (dendritic spike vs. 
+//bAP), percent of slow inactivating sodium conductance
+//and gap between events
+xpanel("Simulation parameters")
+xvalue("Delay between stimulation events","delay",1)
+xvalue("Synaptic conductance", "syng",1)
+xvalue("Current injection amplitude","stimdel",1)
+xvalue("Fraction of distal slow Na","distslowfrac",1)
+xvalue("Event 1 type (0=dendritic spike,1=bAP)","currinjon",1)
+xpanel(0,75)
+
+//Run control box
+objref contrl
+contrl = new VBox()
+contrl.intercept(1)
+nrncontrolmenu()
+contrl.intercept(0)
+contrl.map("Control",1,400,-1,-1)
+
+//Voltage shape plot
+objref shbox
+shbox = new VBox()
+shbox.intercept(1)
+access somaA
+objref sl 
+sl = new SectionList()
+sl.wholetree()
+objref s
+s = new PlotShape(sl)
+s.colormap(12,1)
+s.colormap(0,0,0,255)
+s.colormap(1,0,85,255)
+s.colormap(2,0,170,255)
+s.colormap(3,0,255,255)
+s.colormap(4,0,255,128)
+s.colormap(5,0,255,0)
+s.colormap(6,110,255,0) 
+s.colormap(7,180,255,0)
+s.colormap(8,255,255,0) 
+s.colormap(9,255,170,0)
+s.colormap(10,255,100,0)
+s.colormap(11,255,0,0)
+s.variable("v")
+s.show(0)
+s.exec_menu("Shape Plot")
+s.scale(-70,40)
+fast_flush_list.append(s)
+shbox.intercept(0)
+shbox.map("Shape",700,10,400,400)
+
+//Voltage plot at soma, time window around first event
+objref volts
+volts = new VBox()
+volts.intercept(1)
+objref g
+g = new Graph()
+g.addvar("somaA.v(0.5)",1,0)
+g.size(ampasyn.onset-10,ampasyn.onset+100,-70,20)
+graphList[0].append(g)
+g.save_name("graphList[0].")
+volts.intercept(0)
+volts.map("voltages",200,0,350,400)
+
+//Voltage plot at dendrite, time window around first event
+objref volts2
+volts2 = new VBox()
+volts2.intercept(1)
+objref g2
+g2 = new Graph()
+g2.addvar("dendA5_011111010.v(0.6)",2,0)
+g2.size(ampasyn.onset-10,ampasyn.onset+100,-70,25)
+graphList[0].append(g2)
+g2.save_name("graphList[0].")
+volts2.intercept(0)
+volts2.map("voltages",600,0,350,400)
+
+//Voltage plot at soma, time window around second event
+objref volts3			
+volts3 = new VBox()
+volts3.intercept(1)
+objref g3
+g3 = new Graph()
+g3.addvar("somaA.v(0.5)",1,0)
+g3.size(ampasyn2.onset-10,ampasyn2.onset+100,-70,20)
+graphList[0].append(g3)
+g3.save_name("graphList[0].")
+volts3.intercept(0)
+volts3.map("voltages",200,400,350,400)
+
+//Voltage plot at dendrite, time window around second event
+objref volts4				
+volts4 = new VBox()
+volts4.intercept(1)
+objref g4
+g4 = new Graph()
+g4.addvar("dendA5_011111010.v(0.6)",2,0)
+g4.size(ampasyn2.onset-10,ampasyn2.onset+100,-70,20)
+graphList[0].append(g4)
+g4.save_name("graphList[0].")
+volts4.intercept(0)
+volts4.map("voltages",600,400,350,400)
+
