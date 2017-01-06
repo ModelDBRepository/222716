@@ -1,0 +1,9 @@
+load_file("nrngui.hoc")
+
+xpanel("choose a simulation")
+  xlabel("Choose a simulation and then press Init&Run")
+  xlabel("Quit and restart between runs")
+  xbutton("Activity-dependent backpropagation of a train of action potentials (bAPs)","load_file(\"ri06_runAPtrain.hoc\")")
+  xbutton("Suppression of dendritic spike generation by local depolarization","load_file(\"ri06_runsyn.hoc\")")
+  xbutton("Quit","quit()")
+xpanel()
